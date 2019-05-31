@@ -1,0 +1,94 @@
+<html>
+
+<head>
+    <title>抖音无水印视频采集</title>
+    <meta charset="UTF-8">
+    <meta content="target-densitydpi=device-dpi, width=750,user-scalable=no" name="viewport" />
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.3.0/video-js.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/douyin.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.3.0/video.min.js"></script>
+</head>
+
+<body>
+    <div class="content">
+        <div class="search">
+            <span class="key">分享内容:</span>
+            <input id="url"></input>
+            <button class="btns" onclick="caiji()">采集</button>
+        </div>
+        <div class="list">
+            <p>
+                <span class="key">作者信息:</span>
+                <span class="user-info" id="info">
+                    
+                </span>
+            </p>
+            <p>
+                <span class="key">视频描述:</span>
+                <span id="desc"></span>
+            </p>
+            <p>
+                <span class="key">点赞数量:</span>
+                <span id="star"></span>
+            </p>
+            <h5>无水印下载地址:</h5>
+            <ul id="play_lists"></ul>
+        </div>
+    </div>
+    <script src="./clipboard.min.js"></script>
+    <script>
+        var caiji = function () {
+            var url = $('#url').val().replace(/#/g, '');
+            if (url.length < 1) {
+                alert('分享链接错误');
+            }
+            $.get('http://douyin.itxiao6.top/api.php', {
+                url: url
+            }, function (data) {
+                if (data.status == 200) {
+                    $('#desc').html(data.data.desc);
+                    $('#star').html(data.data.star_count);
+                    $("#info").empty();
+                    $('#play_lists').empty();
+                    $("#info").append($('<span class="item">'+
+                    '<span class="key">头像:</span><img id="headimg" src="'+ data.data.video_author_info.avatar[0] +'" alt=""></span>'+
+                    '<span class="item"><span class="key">昵称:</span><span id="username">'+ data.data.video_author_info.nickname +'</span></span>'+
+                    '<span class="item"><span class="key">介绍:</span><span id="">'+ data.data.video_author_info.signature +'</span></span>'))
+                    for (var i = 0; i < data.data.video_play_lists.length; i++) {
+                        $('#play_lists').append('' +
+                            '<li>' +
+                            ' <video id="example_video_1" class="video-js vjs-default-skin" controls preload="none" poster="' +
+                            data.data.video_image[i] +
+                            '"><source src="http://douyin.itxiao6.top/download.php?file_name=视频&url=' +
+                            data.data.video_play_lists[i] + '"></video>' +
+                            '<span class="btn" data-clipboard-text="http://douyin.itxiao6.top/download.php?file_name=视频&url=' +
+                            data.data.video_play_lists[i] + '">点击复制</span>' +
+                            '</li>');
+                    }
+                } else {
+                    alert(data.msg);
+                }
+            });
+        }
+        /**
+         * todo 复制链接
+         */
+        var clipboard = new ClipboardJS('.btn');
+
+        clipboard.on('success', function (e) {
+            console.info('Action:', e.action);
+            console.info('Text:', e.text);
+            console.info('Trigger:', e.trigger);
+            alert("复制成功")
+        });
+
+        clipboard.on('error', function (e) {
+            console.error('Action:', e.action);
+            console.error('Trigger:', e.trigger);
+            alert("复制失败")
+        });
+    </script>
+</body>
+
+</html>
